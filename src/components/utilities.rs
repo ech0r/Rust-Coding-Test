@@ -213,16 +213,32 @@ fn handle_dispute(client: &mut Client, incoming_tx: &Transaction) -> Result<(), 
     // make sure referenced tx actually contains an amount
     let amount = referenced_tx.amount
         .ok_or(format!("[ERROR]: Disputed transaction: {} does not have an amount! Discarding transaction.", incoming_tx.tx))?;
-    // available funds decrease, perform checked subtraction on available balance, in case of overflow
-    client.available = client.available.checked_sub(amount)
-        .ok_or(format!("[ERROR]: Dispute on tx: {}, for amount: {}, will cause a underflowed (u64) or negative available balance if disputed. Discarding transaction.", incoming_tx.tx, amount))?;
-    // held funds increase, perform checked add on held balance, in case of overflow
-    client.held = client.held.checked_add(amount)
-        .ok_or(format!("[ERROR]: Dispute on tx: {}, for amount: {}, will cause an overflowed (MAX::u64/10e3) held balance for client {}. Discarding transaction.", incoming_tx.tx, amount, client.client))?;
-    // at this point we know we have a valid dispute, so we can go ahead and change the disputed flag, on the referenced tx
-    referenced_tx.disputed = true;
-    // total funds remain the same
-    Ok(())
+    // I make an assumption that different logic is required to dispute a Deposit vs a Withdrawal
+    match referenced_tx.transaction_type {
+        TransactionType::Deposit => {
+            // available funds decrease, perform checked subtraction on available balance, in case of overflow
+            client.available = client.available.checked_sub(amount)
+                .ok_or(format!("[ERROR]: Dispute on tx: {}, for amount: {}, will cause a underflowed (u64) or negative available balance if disputed. Discarding transaction.", incoming_tx.tx, amount))?;
+            // held funds increase, perform checked add on held balance, in case of overflow
+            client.held = client.held.checked_add(amount)
+                .ok_or(format!("[ERROR]: Dispute on tx: {}, for amount: {}, will cause an overflowed (MAX::u64/10e3) held balance for client {}. Discarding transaction.", incoming_tx.tx, amount, client.client))?;
+            // at this point we know we have a valid dispute, so we can go ahead and change the disputed flag, on the referenced tx
+            referenced_tx.disputed = true;
+            // total funds remain the same
+            Ok(())
+        },
+        TransactionType::Withdrawal => {
+            // no change to available funds when disputing a withdrawal
+            // held funds increase, perform checked add on held balance, in case of overflow
+            client.held = client.held.checked_add(amount)
+                .ok_or(format!("[ERROR]: Dispute on tx: {}, for amount: {}, will cause an overflowed (MAX::u64/10e3) held balance for client {}. Discarding transaction.", incoming_tx.tx, amount, client.client))?;
+            // at this point we know we have a valid dispute, so we can go ahead and change the disputed flag, on the referenced tx
+            referenced_tx.disputed = true;
+            // total funds have increased since we are giving a potential refund
+            client.total = client.available + client.held;
+            Ok(())
+        }
+    }
 }
 
 // function to handle resolutions
@@ -248,9 +264,7 @@ fn handle_resolve(client: &mut Client, incoming_tx: &Transaction) -> Result<(), 
                 .ok_or(format!("[ERROR]: Resolve on tx: {}, for amount: {}, will cause an overflow (MAX::u64/10e3) on available balance for client {}. Discarding transaction.", incoming_tx.tx, amount, client.client))?;
             Ok(())
         } 
-    }?;
-    // total funds remain the same
-    Ok(())
+    }
 }
 
 // function to handle chargebacks
@@ -273,11 +287,10 @@ fn handle_chargeback(client: &mut Client, incoming_tx: &Transaction) -> Result<(
                 .ok_or(format!("[ERROR]: Chargeback on tx: {}, for amount: {}, will cause an underflow (u64) on the held balance for client {}. Discarding transaction.", incoming_tx.tx, amount, client.client))?;
             // total funds decrease by the amount subtracted from held
             client.total = client.available + client.held; 
+            // at this point we have a valid charge back and have performed the adjustments on the client's held and available funds
+            // freeze client's account
+            client.locked = true;
             Ok(())
         } 
-    }?;
-    // at this point we have a valid charge back and have performed the adjustments on the client's held and available funds
-    // freeze client's account
-    client.locked = true;
-    Ok(())
+    }
 }
