@@ -9,7 +9,7 @@ To run test cases: `cargo test`
 #### 1. Different logic is required to dispute a Withdrawal vs a Deposit
 - Deposits would require Dispute logic as outlined in the requirements:
 >the clients available funds should decrease by the amount disputed, their held funds should increase by the amount disputed
-- Withdrawals would require **Dispute** logic as follows (reversing a **Withdrawal** would probably require a refund):
+- Withdrawals would require **Dispute** logic as follows (reversing a Withdrawal would probably require a refund):
 
 >the clients held funds should increase by the amount disputed (potential refund) and their total funds would also reflect this.
 
@@ -27,7 +27,7 @@ B --> D[Chargeback]
 - This seemed like a logical choice, maybe we'd manually unlock their account after reviewing the activity.
 
 #### 4. A transaction cannot be re-disputed once resolved or charged back
-- This also seemed like a logical decision, since I'm assuming both parties would have reached a resolution with either a **Resolve** or a **Chargeback**.
+- This also seemed like a logical decision, since I'm assuming both parties would have reached a resolution with either a Resolve or a Chargeback.
 
 ## Overview
 1. Transaction data is streamed in 8kb at a time through a `BufReader` then processed record-by-record in a single loop. 
