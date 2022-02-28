@@ -29,14 +29,16 @@ B --> D[Chargeback]
 #### 4. A transaction cannot be re-disputed once resolved or charged back
 - This also seemed like a logical decision, since I'm assuming both parties would have reached a resolution with either a **Resolve** or a **Chargeback**.
 
+## Overview
+1. Transaction data is streamed in 8kb at a time through a `BufReader` then processed record-by-record in a single loop. 
 
-Transaction data is streamed in 8kb at a time through a `BufReader` then processed record-by-record in a single loop. 
+2. I convert the floating point values in the input file (deserialized into `f64`) into `u64` to avoid any floating point errors, then back into `f64` when it's time to serialize the output.
 
-I convert the floating point values in the input file (deserialized into `f64`) into `u64` to avoid any floating point errors, then back into `f64` when it's time to serialize the output.
+3. Transactions use the `transaction_handler` function as an entrypoint and land on `handle_deposit`, `handle_withdrawal`, `handle_dispute`, `handle_resolve`, and `handle_chargeback`, respectively.
 
-I use a `Client` struct to handle data about each account - within that struct I store a `Vec<Transaction>` to track transactions for that client.
+4. I use a `Client` struct to handle data about each account - within that struct I store a `Vec<Transaction>` to track transactions for that client.
 
-Client data is accumulated in a `HashMap<u16, Client>` until we are finished processing the transaction records, at which point it is Serialized back into .csv format and written to STDOUT. 
+5. Client data is accumulated in a `HashMap<u16, Client>` until we are finished processing the transaction records, at which point it is Serialized back into .csv format and written to STDOUT. 
 
 ## Scoring
 
