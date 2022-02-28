@@ -11,7 +11,7 @@ To run test cases: `cargo test`
 >the clients available funds should decrease by the amount disputed, their held funds should increase by the amount disputed
 - Withdrawals would require **Dispute** logic as follows (reversing a **Withdrawal** would probably require a refund):
 
-- the clients held funds would increase by the amount disputed (potential refund) and their total funds would also reflect this.
+>the clients held funds should increase by the amount disputed (potential refund) and their total funds would also reflect this.
 
 #### 2. A Dispute can end up as **either** a Resolve **or** a Chargeback, but not both.
 
