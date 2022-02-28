@@ -1,6 +1,7 @@
 use std::process;
 use std::collections::HashMap;
 use std::error::Error;
+#[allow(unused_imports)]
 use std::fs::File;
 
 // LOCAL
@@ -11,7 +12,7 @@ use components::utilities::{parse_args, process_transaction_data, output_account
 fn run_payments_engine() -> Result<(), Box<dyn Error>> {
     //generate_test_data()?;
     let input_filename = parse_args()?;
-    File::create("transactions.log")?;
+    //File::create("transactions.log")?;
     let mut client_data = HashMap::new();
     process_transaction_data(&input_filename, &mut client_data)?;
     output_accounts(&client_data)?;

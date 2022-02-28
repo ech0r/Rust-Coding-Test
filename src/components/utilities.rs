@@ -3,7 +3,9 @@ use std::collections::HashMap;
 use std::ffi::OsString;
 use std::env::args_os;
 use std::path::Path;
+#[allow(unused_imports)]
 use std::fs::{File, OpenOptions};
+#[allow(unused_imports)]
 use std::io::{Write, BufReader, stdout};
 use csv::{ReaderBuilder, Writer, Trim};
 use rand::{thread_rng, Rng};
@@ -115,9 +117,9 @@ pub fn process_transaction_data(filename: &OsString, client_data: &mut HashMap<u
     let mut reader = ReaderBuilder::new()
         .trim(Trim::All) // we use Trim::All to avoid any whitespace issues in the input file
         .from_reader(buf_reader);
-    let mut record_num: u32 = 0;
+    //let mut record_num: u32 = 0;
     for record in reader.deserialize() { // this should be ~O(n) where n is the number of Transactions
-        record_num += 1;
+        //record_num += 1;
         // implicit Deserialization from serde
         let raw_transaction: RawTransaction = record?;
         // perform conversion of RawTransaction -> Transaction 
@@ -128,14 +130,14 @@ pub fn process_transaction_data(filename: &OsString, client_data: &mut HashMap<u
         // Do our processing here
         match transaction_handler(client, &transaction) {
             Ok(()) => {
-                let mut log_file = OpenOptions::new().append(true).open("transactions.log")?;
+                //let mut log_file = OpenOptions::new().append(true).open("transactions.log")?;
                 client.transactions.push(transaction); // good transaction - we add it to the list of transactions for that client
-                let success_msg = format!("[RECORD #{}][SUCCESS]: Transaction processed successfully.", record_num);
-                write!(log_file, "{}\n", success_msg)?;
+                //let success_msg = format!("[RECORD #{}][SUCCESS]: Transaction processed successfully.", record_num);
+                //write!(log_file, "{}\n", success_msg)?;
             },
-            Err(error_msg) => { // do something with potential error messages -> write to error.log
-                let mut log_file = OpenOptions::new().append(true).open("transactions.log")?;
-                write!(log_file, "[RECORD #{}]{}\n", record_num, error_msg)?;
+            Err(_error_msg) => { // do something with potential error messages -> write to error.log
+                //let mut log_file = OpenOptions::new().append(true).open("transactions.log")?;
+                //write!(log_file, "[RECORD #{}]{}\n", record_num, error_msg)?;
             }, 
         }
     }
