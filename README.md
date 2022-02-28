@@ -9,19 +9,20 @@ To run test cases: `cargo test`
 #### 1. Different logic is required to dispute a Withdrawal vs a Deposit
 - Deposits would require Dispute logic as outlined in the requirements:
 >the clients available funds should decrease by the amount disputed, their held funds should increase by the amount disputed
-- Withdrawals would require **Dispute** logic as follows (reversing a **Withdrawal** would require a refund):
--- the clients held funds would increase by the amount disputed (potential refund) and their total funds would also reflect this.
+- Withdrawals would require **Dispute** logic as follows (reversing a **Withdrawal** would probably require a refund):
+
+- the clients held funds would increase by the amount disputed (potential refund) and their total funds would also reflect this.
 
 #### 2. A Dispute can end up as **either** a Resolve **or** a Chargeback, but not both.
 
-  E.g.
+E.g.
 ```mermaid
 graph TD
 A[Transaction] --> B{Dispute}
 B --> C[Resolve]
 B --> D[Chargeback]
-
 ```
+
 #### 3. Once a client account is frozen, they can't process any further transactions. Any subsequent transactions after a Chargeback are ignored.
 - This seemed like a logical choice, maybe we'd manually unlock their account after reviewing the activity.
 
@@ -30,6 +31,8 @@ B --> D[Chargeback]
 
 
 Transaction data is streamed in 8kb at a time through a `BufReader` then processed record-by-record in a single loop. 
+
+I convert the floating point values in the input file (deserialized into `f64`) into `u64` to avoid any floating point errors, then back into `f64` when it's time to serialize the output.
 
 I use a `Client` struct to handle data about each account - within that struct I store a `Vec<Transaction>` to track transactions for that client.
 
