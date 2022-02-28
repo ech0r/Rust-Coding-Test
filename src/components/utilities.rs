@@ -241,7 +241,7 @@ fn handle_dispute(client: &mut Client, incoming_tx: &Transaction) -> Result<(), 
             Ok(())
         },
         _ => Err(format!("[ERROR]: Cannot dispute any transaction other than a Withdrawal or Deposit").into()),
-    }
+    } 
 }
 
 // function to handle resolutions
