@@ -12,6 +12,7 @@ use math::round;
 // LOCAL
 use crate::components::data_structures::{Client, RawClient, Transaction, RawTransaction, TransactionType};
 
+#[allow(dead_code)]
 fn generate_deposit() -> RawTransaction {
     RawTransaction {
         transaction_type: TransactionType::Deposit,
@@ -21,6 +22,7 @@ fn generate_deposit() -> RawTransaction {
     }
 }
 
+#[allow(dead_code)]
 pub fn generate_test_data() -> Result<(), Box<dyn Error>> {
     let first_transaction = generate_deposit();
     let mut test_txs: Vec<RawTransaction> = vec![first_transaction];
@@ -120,10 +122,10 @@ pub fn process_transaction_data(filename: &OsString, client_data: &mut HashMap<u
         let raw_transaction: RawTransaction = record?;
         // perform conversion of RawTransaction -> Transaction 
         let transaction: Transaction = raw_transaction.into();
-        // Do our processing here
         let client_id = transaction.client;
         // get mutable reference to Client, if it doesn't already exist we create it
         let client = get_or_insert(client_id, client_data)?; // if we have an error here we should probably terminate - something else is going on ;)
+        // Do our processing here
         match transaction_handler(client, &transaction) {
             Ok(()) => {
                 let mut log_file = OpenOptions::new().append(true).open("transactions.log")?;
@@ -237,7 +239,8 @@ fn handle_dispute(client: &mut Client, incoming_tx: &Transaction) -> Result<(), 
             // total funds have increased since we are giving a potential refund
             client.total = client.available + client.held;
             Ok(())
-        }
+        },
+        _ => Err(format!("[ERROR]: Cannot dispute any transaction other than a Withdrawal or Deposit").into()),
     }
 }
 
@@ -253,7 +256,7 @@ fn handle_resolve(client: &mut Client, incoming_tx: &Transaction) -> Result<(), 
     // check to see if transaction is disputed
     match referenced_tx.disputed {
         // referenced tx IS NOT disputed
-        false => Err(format!("[ERROR]: Resolve references a tx: {}, that isn't under dispute. Discarding transaction.", incoming_tx.tx)),
+        false => Err(format!("[ERROR]: Resolve references a tx: {}, that isn't under dispute. Discarding transaction.", incoming_tx.tx).into()),
         // referenced tx IS disputed
         true => {
             // held funds decrease, checked subraction on held balance, in case of overflow
@@ -279,7 +282,7 @@ fn handle_chargeback(client: &mut Client, incoming_tx: &Transaction) -> Result<(
     // check to see if transaction is disputed
     match referenced_tx.disputed {
         // referenced tx IS NOT disputed
-        false => Err(format!("[ERROR]: Chargeback for client: {}, references tx: {}, which isn't under dispute. Discarding transaction.", incoming_tx.client, incoming_tx.tx)),
+        false => Err(format!("[ERROR]: Chargeback for client: {}, references tx: {}, which isn't under dispute. Discarding transaction.", incoming_tx.client, incoming_tx.tx).into()),
         // referenced tx IS disputed
         true => {
             // held funds decrease, checked subraction on held balance, in case of overflow

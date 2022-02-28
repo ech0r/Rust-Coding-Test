@@ -5,6 +5,7 @@ use std::fs::File;
 
 // LOCAL
 mod components;
+#[allow(unused_imports)]
 use components::utilities::{parse_args, process_transaction_data, output_accounts, generate_test_data};
 
 fn run_payments_engine() -> Result<(), Box<dyn Error>> {

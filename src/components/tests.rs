@@ -2,7 +2,7 @@ use std::path::Path;
 use std::collections::HashMap;
 use std::ffi::OsString;
 use crate::components::utilities::process_transaction_data;
-use crate::components::data_structures::{Client, RawClient};
+use crate::components::data_structures::{RawClient};
 
 #[test]
 pub fn positive_dispute() {
