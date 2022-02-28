@@ -4,7 +4,7 @@ To run: `cargo run -- input_filename.csv > output_file.csv`
 To run test cases: `cargo test`
 ##
 
-In my solution I make the following assumptions:
+### In my solution I make the following assumptions:
 
 #### 1. Different logic is required to dispute a Withdrawal vs a Deposit
 - Deposits would require Dispute logic as outlined in the requirements:
