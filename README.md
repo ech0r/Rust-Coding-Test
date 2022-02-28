@@ -25,6 +25,3 @@ Transaction data is streamed in 8kb at a time through a `BufReader` then process
 I use a `Client` struct to handle data about each account - within that struct I store a `Vec<Transaction>` to track transactions for that client.
 
 Client data is accumulated in a `HashMap<u16, Client>` until we are finished processing the transaction records, at which point it is Serialized back into .csv format and written to STDOUT. 
-
-
-
