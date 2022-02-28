@@ -103,7 +103,7 @@ pub fn output_accounts(client_data: &HashMap<u16, Client>) -> Result<(), Box<dyn
     Ok(())
 }
 
-// first pass at function to parse ALL transactions into a Vec at once
+// first pass at function to process transaction data in chunks
 pub fn process_transaction_data(filename: &OsString, client_data: &mut HashMap<u16, Client>) -> Result<(), Box<dyn Error>> {
     // this source could be a TcpStream, etc.
     let transaction_data_file = File::open(filename)?; 
